@@ -6,15 +6,20 @@ Description: A Drafter web application that helps engineering students break dow
              and direction angle.
 """
 
-import sys
-import types
 from dataclasses import dataclass
 import math
 
 # =============================================================================
-# ENVIRONMENT COMPATIBILITY FIX FOR PYTHON 3
+# ENVIRONMENT COMPATIBILITY FIX FOR LOCAL PYTHON 3
 # =============================================================================
-if "crypto_tools" not in sys.modules:
+# Uses the real crypto_tools on GitHub Actions, and falls back to a local mock
+# only if the package is missing on local Python 3.14.
+try:
+    import crypto_tools  # noqa: F401
+except ImportError:
+    import sys
+    import types
+
     mock_crypto = types.ModuleType("crypto_tools")
     mock_crypto.decrypt_text = lambda text, key=None: text
     mock_crypto.encrypt_text = lambda text, key=None: text
@@ -26,6 +31,19 @@ from drafter import (
     start_server, set_site_information
 )
 from bakery import assert_equal
+
+
+# =============================================================================
+# SITE CONFIGURATION (Must be at module top-level for GitHub deployment)
+# =============================================================================
+
+set_site_information(
+    author="Alex Irizarry",
+    description="Statics vector component solver web application built with Drafter.",
+    sources=["Python math module", "Drafter documentation"],
+    planning="Design Document",
+    links=["https://udel.edu"]
+)
 
 
 # =============================================================================
@@ -315,13 +333,4 @@ test_routes()
 # =============================================================================
 
 if __name__ == "__main__":
-    # Note: Keep set_site_information commented out if it triggers
-     UpdatedConfiguration sync errors in Drafter 2.2.0 local browser mode.
-     set_site_information(
-         author="Alex Irizarry",
-         description="Statics vector component solver web application built with Drafter.",
-         sources=["Python math module", "Drafter documentation"],
-         planning=["Design Document"],
-         links=["https://udel.edu"]
-     )
     start_server(create_initial_state())
